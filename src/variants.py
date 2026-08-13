@@ -13,7 +13,7 @@ BASE = {
     'augment': True,
     'epochs': 50,
     'batch_size': 128,
-    'lr': 1e-3,
+    'lr': 3e-4,  # chosen on validation over {1e-3, 3e-4}, then frozen for every variant
 }
 
 VARIANTS = {
