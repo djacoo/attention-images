@@ -101,4 +101,8 @@ if __name__ == '__main__':
     names = sys.argv[1:] or [n for n in VARIANTS if n != 'R3']
     for name in names:
         for seed in (0, 1, 2):
+            # skip finished runs so an interrupted grid can be resumed
+            if (Path('results') / f'{name}_seed{seed}.json').exists():
+                print(f'{name} seed{seed} already done, skipping')
+                continue
             train_variant(name, seed=seed)
