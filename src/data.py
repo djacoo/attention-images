@@ -46,11 +46,13 @@ def build_transforms(augment):
     return transforms.Compose(steps)
 
 
-def get_loaders(batch_size=128, augment=True, seed=0, workers=8, root='./data'):
+def get_loaders(batch_size=128, augment=True, seed=0, workers=0, root='./data'):
     """Return train, validation and test loaders. 45k / 5k / 10k, notes §26.1.
 
-    The augmentation runs on CPU in PIL and is the throughput bottleneck, so the
-    loaders use worker processes.
+    Loading single-process is deliberate. Worker processes load batches faster in
+    isolation, but on this machine they compete with the GPU submission thread and
+    make a training epoch 2.4x slower (24 s single-process against 57 s with 8
+    workers). Augmentation costs 17 ms per batch, cheaper than the IPC to avoid it.
     """
     train_full = datasets.CIFAR10(root, train=True, download=True,
                                   transform=build_transforms(augment))
