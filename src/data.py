@@ -1,6 +1,7 @@
 """CIFAR-10 loaders — dataset and augmentation from Lab 04, Self_supervised_learning.ipynb."""
 
 import random
+from pathlib import Path
 
 import numpy as np
 import torch
@@ -15,6 +16,10 @@ CLASS_NAMES = ['airplane', 'automobile', 'bird', 'cat', 'deer',
                'dog', 'frog', 'horse', 'ship', 'truck']
 
 SPLIT_SEED = 0  # fixed for every run so all variants see the same split
+
+# Anchored to the repo, not the working directory: the notebook runs from notebooks/
+# and a relative path would download a second copy of the dataset there.
+DATA_ROOT = Path(__file__).resolve().parent.parent / 'data'
 
 
 def seed_everything(seed):
@@ -46,7 +51,7 @@ def build_transforms(augment):
     return transforms.Compose(steps)
 
 
-def get_loaders(batch_size=128, augment=True, seed=0, workers=0, root='./data'):
+def get_loaders(batch_size=128, augment=True, seed=0, workers=0, root=DATA_ROOT):
     """Return train, validation and test loaders. 45k / 5k / 10k, notes §26.1.
 
     Loading single-process is deliberate. Worker processes load batches faster in
