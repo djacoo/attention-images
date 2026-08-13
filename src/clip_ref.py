@@ -6,7 +6,7 @@ from pathlib import Path
 import numpy as np
 import torch
 
-from src.data import CLASS_NAMES, get_loaders, get_device
+from src.data import CLASS_NAMES, DATA_ROOT, get_device
 from src.evaluate import score
 
 PROMPT_TEMPLATE = 'A photo of a {}'  # Lab 10, zero_shot_classify
@@ -19,9 +19,11 @@ def build_prompts():
 def run(results_dir='results'):
     """Zero-shot classify the CIFAR-10 test set and save the result as R3."""
     import open_clip
+    from torch.utils.data import DataLoader
+    from torchvision import datasets
 
     device = get_device()
-    model, _, _ = open_clip.create_model_and_transforms(
+    model, _, preprocess = open_clip.create_model_and_transforms(
         'ViT-B-32', pretrained='laion2b_s34b_b79k')
     model = model.to(device).eval()
     tokenizer = open_clip.get_tokenizer('ViT-B-32')
@@ -30,7 +32,10 @@ def run(results_dir='results'):
         text = model.encode_text(tokenizer(build_prompts()).to(device))
         text = text / text.norm(dim=-1, keepdim=True)
 
-    _, _, test_loader = get_loaders(batch_size=128, augment=False)
+    # CLIP's own preprocessing, as Lab 10 does. It resizes to 224: at CIFAR-10's native
+    # 32x32 the ViT-B/32 encoder sees one patch where its position table expects 49.
+    test = datasets.CIFAR10(DATA_ROOT, train=False, download=True, transform=preprocess)
+    test_loader = DataLoader(test, batch_size=128)
     all_labels, all_predictions = [], []
 
     with torch.no_grad():
