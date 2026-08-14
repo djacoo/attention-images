@@ -7,3 +7,4 @@ data/
 .venv/
 results/*.pt
 results/lr_probe/
+results/*.log
